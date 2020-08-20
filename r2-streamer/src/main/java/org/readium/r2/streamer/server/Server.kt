@@ -196,6 +196,28 @@ abstract class AbstractServer(private var port: Int) : RouterNanoHTTPD("127.0.0.
         addRoute(FONT_HANDLE, FontHandler::class.java, fonts)
     }
 
+    fun removeEpub(fileName: String) {
+        val baseUrl = URL(Publication.localBaseUrlOf(filename = fileName, port = port))
+
+        // NanoHTTPD expects percent-decoded routes.
+        val basePath =
+            try {
+                URLDecoder.decode(baseUrl.path, "UTF-8")
+            } catch (e: Exception) {
+                baseUrl.path
+            }
+
+        if (containsMediaOverlay) {
+            removeRoute(basePath + MEDIA_OVERLAY_HANDLE)
+        }
+        removeRoute(basePath + JSON_MANIFEST_HANDLE)
+        removeRoute(basePath + MANIFEST_HANDLE)
+        removeRoute(basePath + MANIFEST_ITEM_HANDLE)
+        removeRoute(JS_HANDLE)
+        removeRoute(CSS_HANDLE)
+        removeRoute(FONT_HANDLE)
+    }
+
     /* FIXME: To review once the media-overlays will be supported in the Publication model
          private fun addLinks(publication: Publication, filePath: String) {
         containsMediaOverlay = false
